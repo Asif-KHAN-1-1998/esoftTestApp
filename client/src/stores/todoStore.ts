@@ -9,14 +9,13 @@ export interface Todo {
     updated_at: string;
     priority: string;
     status: string;
-    creator_first_name: string;
-    creator_last_name: string;
-    assignee_first_name: string;
-    assignee_last_name: string;
+    creator_id: number;
+    assignee_id: number
+
   }
 
   class TodoStore {
-    todos: Todo[] = []; // ⬅️ Здесь тип стал Todo[], а не string[]
+    todos: Todo[] = [];
   
     constructor() {
       makeAutoObservable(this);
@@ -26,13 +25,25 @@ export interface Todo {
       fetch('/api/todos')
         .then(response => response.json())
         .then(data => {
-          this.todos = data;
-        });
+          this.todos = data;})
+        .catch(error => console.error(error));
     }
 
-  addTodo(todo: string) {
-    this.todos.push(todo);
-  }
+    addTodo(todo: Todo) {
+      fetch('/api/todos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(todo),
+      })
+        .then(response => response.json())
+        .then(data => {
+          // Обновляем список задач после добавления новой
+          this.todos.push(data); // Можно использовать data, если сервер возвращает добавленную задачу
+        })
+        .catch(error => console.error('Ошибка при добавлении задачи:', error));
+    }
 
   removeTodo(index: number) {
     this.todos.splice(index, 1);

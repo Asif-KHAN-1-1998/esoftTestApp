@@ -40,24 +40,44 @@ app.get('/api/users', async (req, res) => {
     }
   });
   
-  app.post('/api/todos/create', async (req, res) => {
+  app.post('/api/todos', async (req, res) => {
+    const {
+      title,
+      description,
+      due_date,
+      priority,
+      status,
+      creator_id,
+      assignee_id
+    } = req.body;
+  
     try {
-      const result = await pool.query(`
-        SELECT 
-          u.id,
-          u.first_name AS user_first_name,
-          u.last_name AS user_last_name,
-          u.manager_id AS manager_id,
-          u.username AS username
-        FROM users u
-        LEFT JOIN users m ON u.manager_id = m.id
-      `);
-      res.json(result.rows);
+      const result = await pool.query(
+        `
+        INSERT INTO todos (
+          title,
+          description,
+          due_date,
+          created_at,
+          updated_at,
+          priority,
+          status,
+          creator_id,
+          assignee_id
+        ) VALUES ($1, $2, $3, NOW(), NOW(), $4, $5, $6, $7)
+        RETURNING *;
+        `,
+        [title, description, due_date, priority, status, creator_id, assignee_id]
+      );
+  
+      res.status(201).json(result.rows[0]);
     } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server error');
+      console.error('Ошибка при создании задачи:', err.message);
+      res.status(500).send('Ошибка сервера');
     }
   });
+
+
   app.get('/api/todos', async (req, res) => {
     try {
       const result = await pool.query(`
@@ -70,13 +90,9 @@ app.get('/api/users', async (req, res) => {
           t.updated_at,
           t.priority,
           t.status,
-          c.first_name AS creator_first_name,
-          c.last_name AS creator_last_name,
-          a.first_name AS assignee_first_name,
-          a.last_name AS assignee_last_name
+          t.creator_id,
+          t.assignee_id
         FROM todos t
-        LEFT JOIN users c ON t.creator_id = c.id
-        LEFT JOIN users a ON t.assignee_id = a.id;
       `);
       res.json(result.rows);
     } catch (err) {

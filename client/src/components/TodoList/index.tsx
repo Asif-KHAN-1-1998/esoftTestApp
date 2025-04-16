@@ -1,29 +1,24 @@
 import { observer } from "mobx-react-lite";         // наблюдатель за MobX-хранилищем
 import { todoStore } from "../../stores/todoStore";  // импорт твоего стора
 import { useState, useEffect } from "react";                    // локальное состояние для ввода
+import Modal from 'react-modal';
+import TodoItem from "../TodoItem";
+
+
+Modal.setAppElement('#root');
 
 const TodoList = observer(() => {
-  const [newTodo, setNewTodo] = useState(""); // временное состояние для input
+   // временное состояние для input
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
-  const handleAdd = () => {
-    if (newTodo.trim()) {
-      todoStore.addTodo({
-        id: 1,
-        title: 'Пример задачи',
-        description: 'Описание задачи',
-        due_date: '2025-05-01',
-        created_at: '2025-04-16',
-        updated_at: '2025-04-16',
-        priority: 'высокий',
-        status: 'к выполнению',
-        creator_first_name: 'Иван',
-        creator_last_name: 'Иванов',
-        assignee_first_name: 'Пётр',
-        assignee_last_name: 'Петров'
-      });; // добавляем задачу в store
-      setNewTodo("");             // очищаем поле ввода
-    }
+  const openModal = () => {
+    setModalIsOpen(true);
   };
+  
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
+
   useEffect(() => {
     todoStore.loadTodo();
   }, []);
@@ -34,13 +29,10 @@ const TodoList = observer(() => {
       <h2>📝 Список задач</h2>
 
       {/* Поле ввода и кнопка добавления */}
-      <input
-        type="text"
-        value={newTodo}
-        onChange={(e) => setNewTodo(e.target.value)}
-        placeholder="Введите задачу"
-      />
-      <button onClick={handleAdd}>Добавить</button>
+    <Modal isOpen={modalIsOpen} onRequestClose={closeModal}>
+    <TodoItem onClose={closeModal} appElement={document.getElementById('root')} />
+    </Modal>
+    <button onClick={openModal}>Открыть модальное окно</button>
 
       {/* Список задач */}
       <ul>
@@ -49,7 +41,7 @@ const TodoList = observer(() => {
       <strong>{todo.title}</strong><br />
       {todo.description}<br />
       Приоритет: {todo.priority}, Статус: {todo.status}<br />
-      Ответственный: {todo.assignee_first_name} {todo.assignee_last_name}
+      Создатель: {todo.creator_id} Ответственный {todo.assignee_id}
     </li>
   ))}
 </ul>
