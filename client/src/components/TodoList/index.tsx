@@ -10,9 +10,11 @@ Modal.setAppElement('#root');
 const TodoList = observer(() => {
    // временное состояние для input
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [todoId, setTodoId] = useState<number | undefined>(undefined); // локальное состояние для ввод
 
-  const openModal = () => {
+  const openModal = (id?:number) => {
     setModalIsOpen(true);
+    setTodoId(id)
   };
   
   const closeModal = () => {
@@ -23,28 +25,29 @@ const TodoList = observer(() => {
     todoStore.loadTodo();
   }, []);
 
-
   return (
     <div style={{ padding: '20px' }}>
       <h2>📝 Список задач</h2>
-
-      {/* Поле ввода и кнопка добавления */}
     <Modal isOpen={modalIsOpen} onRequestClose={closeModal}>
-    <TodoItem onClose={closeModal} appElement={document.getElementById('root')} />
+        <TodoItem onClose={closeModal} appElement={document.getElementById('root')} todoID = {todoId}/>
     </Modal>
-    <button onClick={openModal}>Открыть модальное окно</button>
-
-      {/* Список задач */}
-      <ul>
-  {todoStore.todos.map((todo) => (
-    <li key={todo.id}>
-      <strong>{todo.title}</strong><br />
-      {todo.description}<br />
-      Приоритет: {todo.priority}, Статус: {todo.status}<br />
-      Создатель: {todo.creator_id} Ответственный {todo.assignee_id}
-    </li>
-  ))}
-</ul>
+    <button onClick={() => openModal(undefined)}>Создать задачу</button>
+    <ul>
+      {todoStore.todos.length > 0 ? (
+        todoStore.todos.map((todo) => (
+          <li key={todo.id}>
+            <strong>{todo.title}</strong><br />
+            {todo.description}<br />
+            Приоритет: {todo.priority}, Статус: {todo.status}<br />
+            ID: {todo.id} Ответственный {todo.assignee_first_name} {todo.assignee_last_name}<br />
+            <button onClick={() => todoStore.removeTodo(todo.id!)}>Удалить</button>
+            <button onClick={() => openModal(todo.id)}>Редактировать</button>
+          </li>
+        ))
+      ) : (
+        <li>Нет задач</li>
+      )}
+    </ul>
 
     </div>
   );
