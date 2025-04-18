@@ -5,6 +5,7 @@ import Modal from 'react-modal';
 import TodoItem from "../TodoItem";
 
 
+
 Modal.setAppElement('#root');
 
 const TodoList = observer(() => {

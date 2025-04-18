@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@userfront/toolkit": "^1.0.11-canary.1"
+  }
+}

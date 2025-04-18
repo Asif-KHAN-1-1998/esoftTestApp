@@ -1,27 +1,18 @@
 import { useEffect, useState } from 'react';
-
-interface User {
-  id: number;
-  user_first_name: string;
-  user_last_name: string;
-  manager_id: number | null;
-  username: string | null;
-}
+import { userStore } from '../../stores/userStore';
+import { observer } from "mobx-react-lite";  
 
 
-const UsersList = () => {
-  const [users, setUsers] = useState<User[]>([]);
-
+const UsersList = observer(() => {
   useEffect(() => {
-    fetch('/api/users')
-    .then((response) => response.json())
-    .then((data) => setUsers(data))
-    .catch((error) => console.error('Error fetching users:', error));
+    userStore.loadUsers()
   }, []);
+
 
   return (
     <div>
       <h1>Список пользователей</h1>
+      <button onClick={()=> {userStore.userLogout()}}> Выйти </button>
       <table border={1} cellPadding={10}>
         <thead>
           <tr>
@@ -30,16 +21,27 @@ const UsersList = () => {
             <th>Фамилия</th>
             <th>Отчество</th>
             <th>Логин</th>
+            <th>Начальник Имя</th>
+            <th>Начальник Фамилия</th>
+            <th>Подчиненные</th>
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
+          {userStore.users.map((user) => (
             <tr key={user.id}>
               <td>{user.id}</td>
-              <td>{user.user_first_name}</td>
-              <td>{user.user_last_name}</td>
+              <td>{user.first_name}</td>
+              <td>{user.last_name}</td>
+              <td>{user.middle_name}</td>
               <td>{user.username}</td>
-              <td>{user.manager_id}</td>
+              <td>{user.manager_id ? user.creator_first_name : 'Нет'}</td>
+              <td>{user.manager_id ? user.creator_last_name : 'Нет'}</td>
+              <td>{user.subordinate?.map((sub) => (
+                  <div key={sub.id}>
+                    {sub.last_name} {sub.first_name} {sub.middle_name}
+                  </div>
+              ))}</td>
+              
 
             </tr>
           ))}
@@ -47,6 +49,6 @@ const UsersList = () => {
       </table>
     </div>
   );
-};
+});
 
 export default UsersList;

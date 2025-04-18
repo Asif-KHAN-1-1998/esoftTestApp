@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 
 export interface Todo {
     id?: number;
@@ -29,10 +29,9 @@ export interface Todo {
       fetch('/api/todos')
         .then(response => response.json())
         .then(data => {
-          console.log('data', data)
-          this.todos = data;})
-        .catch(error => console.error(error));
-        
+          runInAction(() => {this.todos = data}
+        )})
+        .catch(error => console.error(error));    
     }
 
     addTodo(todo: Todo) {
