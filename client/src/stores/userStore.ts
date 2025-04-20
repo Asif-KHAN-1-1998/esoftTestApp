@@ -1,98 +1,117 @@
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable, runInAction } from 'mobx';
 
 export interface User {
-    id?: number;
-    first_name: string;
-    last_name: string;
-    middle_name: string;
-    username: string;
-    password: string;
-    manager_id?: number | undefined; // Руководитель — тоже пользователь, может быть необязательным
-    subordinate?: User[];
-    creator_first_name?:string;
-    creator_last_name?:string;
+  id?: number;
+  first_name: string;
+  last_name: string;
+  middle_name: string;
+  username: string;
+  password: string;
+  manager_id?: number;
+  subordinate?: User[];
+  creator_first_name?: string;
+  creator_last_name?: string;
+}
+
+export interface AuthData {
+  id?: number;
+  username: string;
+  password: string;
+}
+
+class UserStore {
+  users: User[] = [];
+  authUser: AuthData | null = null;
+
+  constructor() {
+    makeAutoObservable(this);
   }
 
-  export interface AuthData {
-    username: string;
-    password: string;
-  }
-  const token = localStorage.getItem('token');
-  class UserStore {
-    users: User[] = [];
-    authUser: AuthData[] = [];
-  
-    constructor() {
-      makeAutoObservable(this);
+  loadAuthData() {
+    const user = localStorage.getItem('user');
+    if (user) {
+      this.authUser = JSON.parse(user);
     }
-    
-    loadUsers() {
-      fetch('/api/users', {
+  }
+
+  async loadUsers() {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch('/api/users', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      runInAction(() => {
+        this.users = data;
+        const manager = this.users.find((user) => !user.manager_id);
+        if (manager) {
+          const subordinate = this.users.filter((user) => user.manager_id === manager.id);
+          manager.subordinate = subordinate;
         }
-      })
-    .then((response) => response.json())
-    .then((data) => {runInAction(() => {
-      this.users = data;
-      const manager = this.users.find((user) => (!user.manager_id))
-      if (manager) {
-        const subordinate = this.users.filter((user) => (user.manager_id === manager.id))
-        manager.subordinate = subordinate;
-      }
-      
-    });
-    })
-    .catch((error) => console.error('Error fetching users:', error));
+      });
+    } catch (error) {
+      console.error('Error fetching users:', error);
     }
+  }
 
-    userRegistartion(user: User) {
-      fetch('/api/users/register', {
+  async userRegistartion(user: User) {
+    try {
+      const response = await fetch('/api/users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(user),
-      })
-        .then(response => response.json())
-        .then(data => {
-          this.users.push(data);
-        })
-        .catch(error => console.error('Ошибка при регистрации:', error));
-      
+      });
+      const data = await response.json();
+      this.users.push(data);
+      if (response.ok) {
+        return true;
+      }
+    } catch (error) {
+      console.error('Ошибка при регистрации:', error);
     }
+  }
 
-    userLogin(authData: AuthData) {
-      fetch('/api/users/login', {
+  async userLogin(loginData: AuthData) {
+    try {
+      const response = await fetch('/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(authData),
-      })
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-      }})
-      .then(data => {
-        if (data) {
-          // Сохраняем токен
-          console.log('data', data)
+        body: JSON.stringify(loginData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.token) {
+          console.log('token', data);
           localStorage.setItem('token', data.token);
-          // Можно сохранить и пользователя, если приходи
           localStorage.setItem('user', JSON.stringify(data.user));
+
+          return true;
         } else {
           console.warn('Токен не получен');
+          return false;
         }
-      })
-      .catch(error => console.error('Ошибка при авторизации:', error));
+      } else {
+        console.warn('Ошибка при авторизации');
+        return false;
       }
-
-      
-    userLogout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+    } catch (error) {
+      console.error('Ошибка при авторизации:', error);
+      return false;
     }
+  }
+
+  userLogout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  }
 }
 export const userStore = new UserStore();

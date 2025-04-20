@@ -1,0 +1,55 @@
+.todo-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  width: 400px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: sans-serif;
+  margin: 0 auto;
+}
+
+.todo-item input,
+.todo-item select,
+.todo-item textarea {
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+}
+
+.todo-item input:focus,
+.todo-item select:focus,
+.todo-item textarea:focus {
+  border-color: #007bff;
+}
+
+.todo-item button {
+  padding: 10px;
+  font-size: 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.todo-item button[type='submit'] {
+  background-color: #28a745;
+  color: white;
+}
+
+.todo-item button[type='submit']:hover {
+  background-color: #218838;
+}
+
+.todo-item button[type='button'] {
+  background-color: #6c757d;
+  color: white;
+}
+
+.todo-item button[type='button']:hover {
+  background-color: #5a6268;
+}

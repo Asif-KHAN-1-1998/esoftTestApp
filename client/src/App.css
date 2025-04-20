@@ -1,6 +1,7 @@
-body {
-  background-color: whitesmoke;
-  display: flex;
-  justify-content: center;
-  width: 100%;
+/* App.css */
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
 }

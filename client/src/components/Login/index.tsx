@@ -1,72 +1,58 @@
 import React, { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-interface LoginData {
-  username: string;
-  password: string;
-}
+import { userStore } from '../../stores/userStore';
+import './index.css';
 
 const LoginPage: React.FC = () => {
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
+  const [loginData, setLoginData] = useState({
+    username: '',
+    password: '',
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setLoginData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const navigate = useNavigate();
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-
-    const loginData: LoginData = { username, password };
-
-    try {
-      const response = await fetch('/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(loginData),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        navigate('/one'); // Перенаправляем на защищенную страницу
-      } else {
-        setError(data.error || 'Ошибка при авторизации');
-      }
-    } catch (err) {
-      console.error('Ошибка при выполнении запроса:', err);
-      setError('Ошибка при подключении к серверу');
-    }
+    const result = await userStore.userLogin(loginData);
+    result ? navigate('/') : console.log('wrong auth');
   };
 
   return (
     <div className="login-container">
       <h2>Авторизация</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form onSubmit={handleSubmit} className="login-form">
+        <div className="form-group">
           <label htmlFor="username">Логин:</label>
           <input
             type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            name="username"
+            value={loginData.username}
+            onChange={handleChange}
             required
+            placeholder="Введите логин"
           />
         </div>
-        <div>
+        <div className="form-group">
           <label htmlFor="password">Пароль:</label>
           <input
             type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={loginData.password}
+            onChange={handleChange}
             required
+            placeholder="Введите пароль"
           />
         </div>
-        {error && <div className="error">{error}</div>}
-        <button type="submit">Войти</button>
+        <button type="submit" className="btn-submit">Войти</button>
       </form>
+      <button onClick={() => navigate('/register')} className="btn-register">
+        РЕГИСТРАЦИЯ
+      </button>
     </div>
   );
 };

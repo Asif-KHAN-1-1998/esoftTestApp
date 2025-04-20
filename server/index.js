@@ -2,15 +2,11 @@
 import argon2 from 'argon2'; // для ES6 импорта
 import dotenv from 'dotenv';
 import express from 'express';
-import pg from 'pg';  // Импортируем весь пакет
-const { Pool } = pg;  // Извлекаем Pool
-import cors from 'cors';  // Импортируешь cors
+import pg from 'pg'; // Импортируем весь пакет
+const { Pool } = pg; // Извлекаем Pool
+import cors from 'cors'; // Импортируешь cors
 import jwt from 'jsonwebtoken';
 import { authenticateToken } from './middleware.js';
-
-
-
-
 
 dotenv.config();
 const app = express();
@@ -30,17 +26,9 @@ const pool = new Pool({
 });
 
 // Тудушки
-  
-app.post('/api/todos', async (req, res) => {
-  const {
-    title,
-    description,
-    due_date,
-    priority,
-    status,
-    creator_id,
-    assignee_id
-  } = req.body;
+
+app.post('/api/todos', authenticateToken, async (req, res) => {
+  const { title, description, due_date, priority, status, creator_id, assignee_id } = req.body;
 
   try {
     const result = await pool.query(
@@ -68,8 +56,7 @@ app.post('/api/todos', async (req, res) => {
   }
 });
 
-
-app.get('/api/todos', async (req, res) => {
+app.get('/api/todos', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT 
@@ -101,18 +88,20 @@ app.get('/api/todos', async (req, res) => {
 app.delete('/api/todos/:id', async (req, res) => {
   const id = req.params.id;
   try {
-    await pool.query(`
+    await pool.query(
+      `
       DELETE FROM todos WHERE id = $1;
       `,
-      [id]);
-      res.status(200).json({ success: true });
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server error');
-    }
-  });
+      [id]
+    );
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
 
-app.patch('/api/todos/:id', async (req, res) => {
+app.patch('/api/todos/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { title, description, due_date, priority, status, assignee_id } = req.body;
   try {
@@ -128,17 +117,14 @@ app.patch('/api/todos/:id', async (req, res) => {
     }
 
     res.send('Задача частично обновлена');
-
-  } catch (err){
+  } catch (err) {
     console.error(err.message);
     res.status(500).send('Ошибка сервера');
   }
-  })
-
-
+});
 
 //Пользователи
-app.get(`/api/users`, authenticateToken, async(req, res) => {
+app.get(`/api/users`, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT t.id,
@@ -152,13 +138,14 @@ app.get(`/api/users`, authenticateToken, async(req, res) => {
       c.last_name AS creator_last_name
       FROM users t
       LEFT JOIN users c ON t.manager_id = c.id
-        ` 
-    )
+        `
+    );
     res.json(result.rows);
-} catch (err) {
-  console.error(err.message);
-  res.status(500).send('Ошибка сервера');
-}})
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Ошибка сервера');
+  }
+});
 
 app.post('/api/users/register', async (req, res) => {
   const { first_name, last_name, middle_name, username, password, manager_id } = req.body;
@@ -190,6 +177,7 @@ app.post('/api/users/login', async (req, res) => {
       `SELECT id, username, password FROM users WHERE username = $1`,
       [username]
     );
+
     const user = result.rows[0]; // 👈 добавить
 
     if (!result.rows.length) {
@@ -200,18 +188,14 @@ app.post('/api/users/login', async (req, res) => {
     if (!validPassword) {
       return res.status(401).json({ error: 'Неверный пароль' });
     }
-    const token = jwt.sign({ userId: user.id, username: user.username }, process.env.JWT_SECRET, {
-        expiresIn: '1h',
-      });
+    const token = jwt.sign({ userId: user.id, username: user.username }, process.env.JWT_SECRET);
 
     res.status(200).json({ token, user });
   } catch (err) {
     console.error('Ошибка при авторизации:', err);
     res.status(500).json({ error: 'Ошибка при авторизации' });
   }
-
-})
-
+});
 
 // Запуск сервера
 app.listen(PORT, () => {

@@ -1,0 +1,94 @@
+/* Основные стили для todo-карточки */
+.todo-card {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  color: grey;
+}
+
+.todo-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.todo-title-complete {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: green;
+}
+
+.todo-title-danger {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #c82333;
+}
+
+.todo-description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.todo-meta {
+  font-size: 12px;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.meta-item {
+  margin-bottom: 5px;
+}
+
+.todo-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btn {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-edit {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-edit:hover {
+  background-color: #0056b3;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Заголовки для карточки */
+.todo-card .todo-title {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+/* Для всплывающих подсказок на кнопке удаления */
+button[disabled] {
+  cursor: not-allowed;
+}
