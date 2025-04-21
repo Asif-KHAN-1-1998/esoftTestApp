@@ -6,10 +6,9 @@ import TodoList from './components/TodoList';
 
 function App() {
   useEffect(() => {
-    // Загрузим данные пользователей и задачи
-    userStore.loadAuthData(); // Сначала загрузим authUser
-    userStore.loadUsers();     // Загрузим пользователей
-    todoStore.loadTodo();      // Загрузим задачи
+    userStore.loadAuthData(); 
+    userStore.loadUsers();  
+    todoStore.loadTodo(); 
   }, []);
 
   return (

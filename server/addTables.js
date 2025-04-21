@@ -1,17 +1,20 @@
 
 import pg from 'pg';
-const { Pool } = pg;
+import dotenv from 'dotenv';
 
-const appDbPool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  password: 'your_password', // ⚠️ замени на свой
-  port: 5432,
-  database: 'my_app_db',     // ⚠️ подключаемся к основной БД
+const { Pool } = pg;
+dotenv.config();
+
+const pool = new Pool({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
 });
 
 export async function initTables() {
-  const client = await appDbPool.connect();
+  const client = await pool.connect();
   try {
     // 1. Создание таблицы users
     await client.query(`
