@@ -55,6 +55,7 @@ button {
   background-color: #007bff;
   color: white;
   border: none;
+  width: 100%;
 }
 
 .btn-submit:hover {

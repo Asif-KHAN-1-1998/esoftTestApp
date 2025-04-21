@@ -9,6 +9,8 @@ const LoginPage: React.FC = () => {
     password: '',
   });
 
+  const[error, setError] = useState<boolean>(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setLoginData((prev) => ({ ...prev, [name]: value }));
@@ -19,7 +21,7 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     const result = await userStore.userLogin(loginData);
-    result ? navigate('/') : console.log('wrong auth');
+    result ? navigate('/') : setError(true);
   };
 
   return (
@@ -48,6 +50,7 @@ const LoginPage: React.FC = () => {
             placeholder="Введите пароль"
           />
         </div>
+        {error ? (<div style={{color:'red'}}>Неверный логин или пароль</div>):(<template></template>)}
         <button type="submit" className="btn-submit">Войти</button>
       </form>
       <button onClick={() => navigate('/register')} className="btn-register">

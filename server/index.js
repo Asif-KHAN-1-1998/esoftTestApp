@@ -7,6 +7,11 @@ const { Pool } = pg; // Извлекаем Pool
 import cors from 'cors'; // Импортируешь cors
 import jwt from 'jsonwebtoken';
 import { authenticateToken } from './middleware.js';
+import {checkDatabaseExists} from './checkDb.js'
+import { createDatabase } from './checkDb.js';
+import {initTables} from './addTables.js';
+
+
 
 dotenv.config();
 const app = express();
@@ -24,6 +29,17 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
 });
+
+(async () => {
+  const exists = await checkDatabaseExists('tododatabase');
+  if (!exists) {
+    console.log('БД не найдена');
+    await createDatabase('tododatabase');
+    await initTables()
+  }
+
+
+
 
 // Тудушки
 
@@ -199,5 +215,6 @@ app.post('/api/users/login', async (req, res) => {
 
 // Запуск сервера
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server started on port ${PORT}`);
 });
+})();

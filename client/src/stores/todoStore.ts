@@ -34,7 +34,9 @@ class TodoStore {
           'Content-Type': 'application/json',
         },
       });
+      console.log('res', response)
       if (!response.ok) {
+        response.status === 403 ? userStore.userLogout() : console.log('void')
         throw new Error(`Ошибка загрузки: ${response.status}`);
       }
       const data = await response.json();
@@ -66,6 +68,7 @@ class TodoStore {
         body: JSON.stringify(todo),
       });
       if (!response.ok) {
+        response.status === 403 ? userStore.userLogout() : console.log('void')
         throw new Error(`Ошибка при добавлении задачи: ${response.status}`);
       }
       const data = await response.json();
@@ -97,6 +100,7 @@ class TodoStore {
         },
       });
       if (!response.ok) {
+        response.status === 403 ? userStore.userLogout() : console.log('void')
         throw new Error(`Ошибка при удалении задачи: ${response.status}`);
       }
       runInAction(() => {
@@ -127,6 +131,7 @@ class TodoStore {
         body: JSON.stringify({ ...todo }),
       });
       if (!response.ok) {
+        response.status === 403 ? userStore.userLogout() : console.log('void')
         throw new Error(`Ошибка при обновлении задачи: ${response.status}`);
       }
       runInAction(() => {
