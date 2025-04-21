@@ -6,8 +6,6 @@ const { Pool } = pg;
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import { authenticateToken } from './middleware.js';
-import {checkDatabaseExists} from './checkDb.js'
-import { createDatabase } from './checkDb.js';
 import {initTables} from './addTables.js';
 
 
@@ -29,20 +27,10 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-(async () => {
-  const exists = await checkDatabaseExists('tododatabase');
-  if (!exists) {
-    console.log('БД не найдена');
-    await createDatabase('tododatabase');
-    await initTables()
-  }
-
-
-
-
 // Тудушки
 
 app.post('/api/todos', authenticateToken, async (req, res) => {
+ 
   const { title, description, due_date, priority, status, creator_id, assignee_id } = req.body;
 
   try {
@@ -72,6 +60,7 @@ app.post('/api/todos', authenticateToken, async (req, res) => {
 });
 
 app.get('/api/todos', authenticateToken, async (req, res) => {
+  await initTables()
   try {
     const result = await pool.query(`
       SELECT 
@@ -163,6 +152,7 @@ app.get(`/api/users`, async (req, res) => {
 });
 
 app.post('/api/users/register', async (req, res) => {
+  await initTables()
   const { first_name, last_name, middle_name, username, password, manager_id } = req.body;
   try {
     const hashedPassword = await argon2.hash(password);
@@ -186,6 +176,7 @@ app.post('/api/users/register', async (req, res) => {
 });
 
 app.post('/api/users/login', async (req, res) => {
+  await initTables()
   const { username, password } = req.body;
   try {
     const result = await pool.query(
@@ -193,7 +184,7 @@ app.post('/api/users/login', async (req, res) => {
       [username]
     );
 
-    const user = result.rows[0]; // 👈 добавить
+    const user = result.rows[0];
 
     if (!result.rows.length) {
       return res.status(401).json({ error: 'Пользователь не найден' });
@@ -216,4 +207,3 @@ app.post('/api/users/login', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
-})();
