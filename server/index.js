@@ -1,10 +1,9 @@
-// backend/index.js
-import argon2 from 'argon2'; // для ES6 импорта
+import argon2 from 'argon2'; 
 import dotenv from 'dotenv';
 import express from 'express';
-import pg from 'pg'; // Импортируем весь пакет
-const { Pool } = pg; // Извлекаем Pool
-import cors from 'cors'; // Импортируешь cors
+import pg from 'pg';
+const { Pool } = pg;
+import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import { authenticateToken } from './middleware.js';
 import {checkDatabaseExists} from './checkDb.js'
@@ -17,11 +16,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+
 app.use(cors());
 app.use(express.json());
 
-// Подключение к PostgreSQL
+
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -179,7 +178,7 @@ app.post('/api/users/register', async (req, res) => {
       [first_name, last_name, middle_name, username, hashedPassword, manager_id]
     );
 
-    res.status(201).json(result.rows[0]); // Возвращаем созданного пользователя
+    res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error('Ошибка при регистрации:', err);
     res.status(500).json({ error: 'Ошибка при регистрации пользователя', message: err.message });
@@ -213,7 +212,7 @@ app.post('/api/users/login', async (req, res) => {
   }
 });
 
-// Запуск сервера
+
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
