@@ -49,7 +49,7 @@ export async function initTables() {
       )
     `);
 
-    console.log('✅ Таблицы "users" и "todos" готовы.');
+    console.log('Таблицы "users" и "todos" готовы.');
 
     // 3. Вставка тестовых данных в таблицу users
     await client.query(`
@@ -71,7 +71,7 @@ export async function initTables() {
       ON CONFLICT (title) DO NOTHING;
     `);
 
-    console.log('✅ Тестовые данные успешно добавлены.');
+    console.log(' Тестовые данные успешно добавлены.');
   } catch (err) {
     console.error('Ошибка при инициализации таблиц и добавлении тестовых данных:', err);
   } finally {
